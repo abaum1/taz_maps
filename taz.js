@@ -1,6 +1,9 @@
 //initiate variables
 var tazs;
 var layerOptions = null;
+var timevar = 'am'; //start map with am
+var modevar = 'bike'; //start map bike
+var legend;
 
 // Create variable to hold map element, give initial settings to map
 var map = L.map('map', { center: [37.763317, -122.443445], zoom: 12, renderer: L.canvas()});
@@ -21,40 +24,24 @@ var basemapProperties = {minZoom: 2, maxZoom: 16, attribution: basemapAttributio
 var basemap = L.tileLayer(basemapUrl, basemapProperties);
 map.addLayer(basemap);*/
 
+var colorramp = {0: {'label': '0%&ndash;20%', 'color': '#fee5d9'}, 1: {'label': '20%&ndash;40%', 'color': '#fcae91'}, 2: {'label': '40%&ndash;60%', 'color': '#fb6a4a'}, 3: {'label': '60%&ndash;80%', 'color': 
+'#de2d26'}, 4: {'label': '80%&ndash;100%', 'color': '#a50f15'}};
 
-var colorramp = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'];
-
-/*
-var pct = 33;
-if (pct >=0 && pct <= 20) {
-    color = colorramp[0];
-} else if (pct >20 && pct <=40) {
-    color = colorramp[1];
-} else if (pct >40 && pct <=60) {
-    color = colorramp[2];
-} else if (pct >60 && pct <=80) {
-    color = colorramp[3];
-} else {
-    color = colorramp[4];
-}
-
-console.log(color);
-*/
 
 function style(feature) {
     
-    var pct = feature.properties['drive_alone_am'];
+    var pct = feature.properties[modevar+'_'+timevar];
     var color;
     if (pct >=0 && pct <= 20) {
-        color = colorramp[0];
+        color = colorramp[0].color;
     } else if (pct >20 && pct <=40) {
-        color = colorramp[1];
+        color = colorramp[1].color;
     } else if (pct >40 && pct <=60) {
-        color = colorramp[2];
+        color = colorramp[2].color;
     } else if (pct >60 && pct <=80) {
-        color = colorramp[3];
+        color = colorramp[3].color;
     } else {
-        color = colorramp[4];
+        color = colorramp[4].color;
     }
         
     return {
@@ -98,6 +85,74 @@ function onEachFeature(feature, layer) {
 layerOptions = {
 	style: style, onEachFeature: onEachFeature
 };
+
+
+
+//Add Selection Menu
+//Create popup control for when hovering over polygon
+
+var menu1 = '<select id="timeSelect">' +
+'<option value="am">AM</option>' + 
+'<option value="ea">EA</option>' +
+'<option value="md">MD</option>' +
+'<option value="ev">EV</option>' +
+'<option value="pm">PM</option>' +
+'</select>';
+
+var menu2 = '<select id="modeSelect">' +
+'<option value="bike">Bike</option>' + 
+'<option value="drive_alone">Drive Alone</option>' +
+'<option value="shared_ride_2">Shared Ride 2</option>' +
+'<option value="shared_ride_3">Shared Ride 3</option>' +
+'<option value="taxi">Taxi</option>' +
+'<option value="transit">Transit</option>' +
+'<option value="truck">Truck</option>' +
+'<option value="walk">Walk</option>' +
+'</select>';
+
+var button = '<button onclick="updateMap();">Update Map</button>';
+
+//Define Title
+var title = '<h4>SF Trip Estimates</h4>';
+
+info = L.control({position: 'topleft'});
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+	this._div.innerHTML =  title + menu1 + "</br>" + menu2 + "</br>" + button;
+    return this._div;
+};
+
+info.addTo(map);
+
+//add legend
+function keys(myObj) {//extract keys from obj
+    var ks = [];
+    for (var k in myObj) {if (myObj.hasOwnProperty(k)) {ks.push(k);}}
+    return ks;
+}
+
+legend = L.control({position: 'bottomleft'});
+legend.onAdd = function (map) {
+    var title = 'Percentage of Person Trips';
+    var div = L.DomUtil.create('div', 'info legend');
+    div.innerHTML = '<h4>' + title + '</h4>';
+    
+    //loop from high to low to put legend ranges in descending order
+    for (var i=keys(colorramp).length-1; i>=0; i--) { 
+        div.innerHTML += '<i style="background:' + colorramp[i].color + '"></i> ' + colorramp[i].label + '<br>';
+    }
+    return div;
+};
+legend.addTo(map);//end of legend creation
+
+function updateMap() {
+    timevar = document.getElementById("timeSelect").value;
+    modevar = document.getElementById("modeSelect").value;
+	map.removeLayer(tazs);
+	tazs = L.geoJson(dataset, layerOptions); 
+	map.addLayer(tazs);
+}
 
 var tazs = L.geoJson(dataset, layerOptions); 
 map.addLayer(tazs);
