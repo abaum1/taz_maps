@@ -37,3 +37,14 @@ body {
     margin-right: 8px;
     opacity: 0.7;
 }
+
+.popupHeader {
+  font-weight: bold;
+  color: gray;
+  font-size: 110%;
+}
+
+.popupDetails {
+  font-weight: normal;
+  color: gray;
+}

@@ -6,39 +6,32 @@ var modevar = 'bike'; //start map bike
 var legend;
 
 // Create variable to hold map element, give initial settings to map
-var map = L.map('map', { center: [37.763317, -122.443445], zoom: 12, renderer: L.canvas()});
+var map = L.map('map', { center: [37.763317, -122.443445], zoom: 12});
 
 // Add Tile Layer
-
 L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYmdvZ2dpbiIsImEiOiJjajB1anhqbDAwM2tyMnFscnRtbjQyeTZ0In0.ub1etlqSKPNxMYPTaKLy9w', {
     attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 18,
     id: 'mapbox.streets',
     accessToken: 'your.mapbox.access.token'
 }).addTo(map);
-/*
-//add tile layer basemap to the map
-var basemapUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-var basemapAttribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
-var basemapProperties = {minZoom: 2, maxZoom: 16, attribution: basemapAttribution};
-var basemap = L.tileLayer(basemapUrl, basemapProperties);
-map.addLayer(basemap);*/
 
-var colorramp = {0: {'label': '0%&ndash;20%', 'color': '#fee5d9'}, 1: {'label': '20%&ndash;40%', 'color': '#fcae91'}, 2: {'label': '40%&ndash;60%', 'color': '#fb6a4a'}, 3: {'label': '60%&ndash;80%', 'color': 
-'#de2d26'}, 4: {'label': '80%&ndash;100%', 'color': '#a50f15'}};
+
+var colorramp = {0: {'label': '0%&ndash;15%', 'color': '#fee5d9'}, 1: {'label': '15%&ndash;30%', 'color': '#fcae91'}, 2: {'label': '30%&ndash;45%', 'color': '#fb6a4a'}, 3: {'label': '45%&ndash;60%', 'color': 
+'#de2d26'}, 4: {'label': '60%&ndash;100%', 'color': '#a50f15'}};
 
 
 function style(feature) {
     
     var pct = feature.properties[modevar+'_'+timevar];
     var color;
-    if (pct >=0 && pct <= 20) {
+    if (pct >=0 && pct <= 15) {
         color = colorramp[0].color;
-    } else if (pct >20 && pct <=40) {
+    } else if (pct >15 && pct <=30) {
         color = colorramp[1].color;
-    } else if (pct >40 && pct <=60) {
+    } else if (pct >30 && pct <=45) {
         color = colorramp[2].color;
-    } else if (pct >60 && pct <=80) {
+    } else if (pct >45 && pct <=60) {
         color = colorramp[3].color;
     } else {
         color = colorramp[4].color;
@@ -55,37 +48,53 @@ function style(feature) {
 }
 
 function highlightFeature(e) {
+    
     var layer = e.target;
-
+    var latlng = layer._latlng;
+    
+    var center = layer.getBounds().getCenter();
+    
+    //highlight layer
     layer.setStyle({
-        weight: 5,
-        color: 'black',
-        dashArray: '',
-        fillOpacity: 0.7
+        weight: 5
     });
 
 	// do not perform web highlighting in the given web browsers
+    
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
         layer.bringToFront();
     }
+    info.update(layer.feature.properties);
+    
+    //create popup
+    /*
+    var props = layer.feature.properties;
+    var variable = modevar+'_'+timevar;
+    
+	var popupContent ="<span class='popup-label'><b>" + props['FULLNAME']+ "</b></br><b>" + "Percentage: " + "</b></span>" + "<span class='popup-label'><b>" + props[variable].toString() + "</b></span>";
+
+    var popup = L.popup().setLatLng([center.lat, center.lng]).setContent(popupContent).openOn(map);
+    //layer.bindPopup(popupContent).openPopup(); 
+    //console.log(latlng);
+    */
 }
 
 function resetHighlight(e) {
+    var layer = e.target;
     tazs.resetStyle(e.target);
-	//info.update();
+    info.update();
 }
 
 function onEachFeature(feature, layer) {
     layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight
+        mousemove: highlightFeature,
+        mouseout: resetHighlight,
     });
 }
 
 layerOptions = {
 	style: style, onEachFeature: onEachFeature
 };
-
 
 
 //Add Selection Menu
@@ -115,12 +124,32 @@ var button = '<button onclick="updateMap();">Update Map</button>';
 //Define Title
 var title = '<h4>SF Trip Estimates</h4>';
 
-info = L.control({position: 'topleft'});
+menu = L.control({position: 'topleft'});
+
+menu.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+	this._div.innerHTML =  title + "Time of Day: </br>" + menu1 + "</br>" + "Mode: </br>" + menu2 + "</br>" + button;
+    return this._div;
+};
+
+menu.addTo(map);
+
+var info = L.control({position: 'topleft'});
 
 info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-	this._div.innerHTML =  title + menu1 + "</br>" + menu2 + "</br>" + button;
+	this._div.innerHTML =  "<div id = 'updates'>Hover over a region to see figures</div>";
     return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+    if ($.isEmptyObject(props)) {
+        this._div.childNodes[0].innerHTML = "<div id = 'updates'>Hover over a region to see figures</div>";
+    } else {
+        var variable = modevar+'_'+timevar;
+    	this._div.childNodes[0].innerHTML = "Percentage of Person Trips: " + props[variable] + "%";
+    }
 };
 
 info.addTo(map);
@@ -154,5 +183,5 @@ function updateMap() {
 	map.addLayer(tazs);
 }
 
-var tazs = L.geoJson(dataset, layerOptions); 
+tazs = L.geoJson(dataset, layerOptions); 
 map.addLayer(tazs);
