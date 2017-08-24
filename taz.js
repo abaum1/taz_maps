@@ -194,27 +194,29 @@ moreinfo.update = function (props) {
         time = 'PM'
     }
     
-    
-    this._div.childNodes[0].innerHTML = "<div id = 'updates'><b>In depth info about "+ mode + " " + time + " trips in " + props['FULLNAME']+":</b></div>";
-    this._div.childNodes[0].innerHTML +="Percentage of Regionwide " + mode + " " + time + " Trips: " + props[modevar+'_'+timevar+'_'+'pct'] + "%";
-    this._div.childNodes[0].innerHTML +="<br><br><b>Percentage of these trips going to:</b>";
-    this._div.childNodes[0].innerHTML +="<br>1. Downtown: "+ props[modevar+'_'+timevar+'_'+'1'+'_'+'pct'] + "%";
-    this._div.childNodes[0].innerHTML +="<br>2. SoMa: "+ props[modevar+'_'+timevar+'_'+'2'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>3. N. Beach/Chinatown: "+ props[modevar+'_'+timevar+'_'+'3'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>4. Western Market: "+ props[modevar+'_'+timevar+'_'+'4'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>5. Mission/Potrero: "+ props[modevar+'_'+timevar+'_'+'5'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>6. Noe/Glen/Bernal: "+ props[modevar+'_'+timevar+'_'+'6'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>7. Marina/N. Heights: "+ props[modevar+'_'+timevar+'_'+'7'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>8. Richmond: "+ props[modevar+'_'+timevar+'_'+'8'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>9. Bayshore: "+ props[modevar+'_'+timevar+'_'+'9'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>10. Outer Mission: "+ props[modevar+'_'+timevar+'_'+'10'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>11. Hill Districts: "+ props[modevar+'_'+timevar+'_'+'11'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>12. Sunset: "+ props[modevar+'_'+timevar+'_'+'12'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>13. Islands: "+ props[modevar+'_'+timevar+'_'+'13'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>14. South Bay: "+ props[modevar+'_'+timevar+'_'+'14'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>15. East Bay: "+ props[modevar+'_'+timevar+'_'+'15'+'_'+'pct'] + "%";;
-    this._div.childNodes[0].innerHTML +="<br>16. North Bay: "+ props[modevar+'_'+timevar+'_'+'16'+'_'+'pct'] + "%";;
-    
+    if ($.isEmptyObject(props)) {
+        this._div.childNodes[0].innerHTML = 'Click on a region to see trip destinations';
+    } else {
+        this._div.childNodes[0].innerHTML = "<div id = 'updates'><b>In depth info about "+ mode + " " + time + " trips in " + props['FULLNAME']+":</b></div>";
+        this._div.childNodes[0].innerHTML +="Percentage of Regionwide " + mode + " " + time + " Trips: " + props[modevar+'_'+timevar+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br><br><b>Percentage of these trips going to:</b>";
+        this._div.childNodes[0].innerHTML +="<br>1. Downtown: "+ props[modevar+'_'+timevar+'_'+'1'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>2. SoMa: "+ props[modevar+'_'+timevar+'_'+'2'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>3. N. Beach/Chinatown: "+ props[modevar+'_'+timevar+'_'+'3'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>4. Western Market: "+ props[modevar+'_'+timevar+'_'+'4'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>5. Mission/Potrero: "+ props[modevar+'_'+timevar+'_'+'5'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>6. Noe/Glen/Bernal: "+ props[modevar+'_'+timevar+'_'+'6'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>7. Marina/N. Heights: "+ props[modevar+'_'+timevar+'_'+'7'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>8. Richmond: "+ props[modevar+'_'+timevar+'_'+'8'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>9. Bayshore: "+ props[modevar+'_'+timevar+'_'+'9'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>10. Outer Mission: "+ props[modevar+'_'+timevar+'_'+'10'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>11. Hill Districts: "+ props[modevar+'_'+timevar+'_'+'11'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>12. Sunset: "+ props[modevar+'_'+timevar+'_'+'12'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>13. Islands: "+ props[modevar+'_'+timevar+'_'+'13'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>14. South Bay: "+ props[modevar+'_'+timevar+'_'+'14'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>15. East Bay: "+ props[modevar+'_'+timevar+'_'+'15'+'_'+'pct'] + "%";
+        this._div.childNodes[0].innerHTML +="<br>16. North Bay: "+ props[modevar+'_'+timevar+'_'+'16'+'_'+'pct'] + "%";
+    }
 };
 
 //add legend
@@ -244,6 +246,7 @@ function updateMap() {
 	map.removeLayer(tazs);
 	tazs = L.geoJson(dataset, layerOptions); 
 	map.addLayer(tazs);
+    moreinfo.update();
 }
 
 tazs = L.geoJson(dataset, layerOptions); 
