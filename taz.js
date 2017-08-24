@@ -65,18 +65,6 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
     info.update(layer.feature.properties);
-    
-    //create popup
-    /*
-    var props = layer.feature.properties;
-    var variable = modevar+'_'+timevar;
-    
-	var popupContent ="<span class='popup-label'><b>" + props['FULLNAME']+ "</b></br><b>" + "Percentage: " + "</b></span>" + "<span class='popup-label'><b>" + props[variable].toString() + "</b></span>";
-
-    var popup = L.popup().setLatLng([center.lat, center.lng]).setContent(popupContent).openOn(map);
-    //layer.bindPopup(popupContent).openPopup(); 
-    //console.log(latlng);
-    */
 }
 
 function resetHighlight(e) {
@@ -85,10 +73,18 @@ function resetHighlight(e) {
     info.update();
 }
 
+//on click, pan/zoom to feature and show popup
+function clickFeature(e) {
+    var target = e.target;
+    var props = target.feature.properties;
+    moreinfo.update(props);
+}
+
 function onEachFeature(feature, layer) {
     layer.on({
         mousemove: highlightFeature,
         mouseout: resetHighlight,
+        click: clickFeature
     });
 }
 
@@ -145,7 +141,7 @@ info.onAdd = function (map) {
 // method that we will use to update the control based on feature properties passed
 info.update = function (props) {
     if ($.isEmptyObject(props)) {
-        this._div.childNodes[0].innerHTML = "<div id = 'updates'>Hover over a region to see figures</div>";
+        this._div.childNodes[0].innerHTML = "<div id = 'updates'>Hover over a region to see trip origins</div>";
     } else {
         var variable = modevar+'_'+timevar;
     	this._div.childNodes[0].innerHTML = "Percentage of Person Trips: " + props[variable] + "%";
@@ -154,6 +150,73 @@ info.update = function (props) {
 
 info.addTo(map);
 
+var moreinfo = L.control({position: 'topleft'});
+
+moreinfo.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+	this._div.innerHTML =  "<div id = 'updates'>Click to a region see trip destinations</div>";
+    return this._div;
+};
+
+moreinfo.addTo(map);
+
+// method that we will use to update the control based on feature properties passed
+moreinfo.update = function (props) {
+    var mode;
+    var time;
+    if (modevar== 'walk') {
+        mode = 'Walking'
+    } else if (modevar == 'bike') {
+        mode = 'Biking'
+    } else if (modevar == 'drive_alone') {
+        mode = 'Drive Alone'
+    } else if (modevar == 'shared_ride_2') {
+        mode = 'Drive 2 People'
+    } else if (modevar == 'shared_ride_3') {
+        mode = 'Drive 3 People' 
+    } else if (modevar == 'taxi') {
+        mode = 'Taxi'
+    } else if (modevar == 'transit') {
+        mode = 'Transit'
+    } else if (modevar == 'truck') {
+        mode = 'Truck'
+    }
+    
+    if (timevar == 'am') {
+        time = 'AM'
+    } else if (timevar == 'ea') {
+        time = 'EA'
+    } else if (timevar == 'md') {
+        time = 'MD'
+    } else if (timevar == 'ev') {
+        time = 'EV'
+    } else if (timevar == 'pm') {
+        time = 'PM'
+    }
+    
+    
+    this._div.childNodes[0].innerHTML = "<div id = 'updates'><b>In depth info about "+ mode + " " + time + " trips in " + props['FULLNAME']+":</b></div>";
+    this._div.childNodes[0].innerHTML +="Percentage of Regionwide " + mode + " " + time + " Trips: " + props[modevar+'_'+timevar+'_'+'pct'] + "%";
+    this._div.childNodes[0].innerHTML +="<br><br><b>Percentage of these trips going to:</b>";
+    this._div.childNodes[0].innerHTML +="<br>1. Downtown: "+ props[modevar+'_'+timevar+'_'+'1'+'_'+'pct'] + "%";
+    this._div.childNodes[0].innerHTML +="<br>2. SoMa: "+ props[modevar+'_'+timevar+'_'+'2'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>3. N. Beach/Chinatown: "+ props[modevar+'_'+timevar+'_'+'3'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>4. Western Market: "+ props[modevar+'_'+timevar+'_'+'4'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>5. Mission/Potrero: "+ props[modevar+'_'+timevar+'_'+'5'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>6. Noe/Glen/Bernal: "+ props[modevar+'_'+timevar+'_'+'6'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>7. Marina/N. Heights: "+ props[modevar+'_'+timevar+'_'+'7'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>8. Richmond: "+ props[modevar+'_'+timevar+'_'+'8'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>9. Bayshore: "+ props[modevar+'_'+timevar+'_'+'9'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>10. Outer Mission: "+ props[modevar+'_'+timevar+'_'+'10'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>11. Hill Districts: "+ props[modevar+'_'+timevar+'_'+'11'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>12. Sunset: "+ props[modevar+'_'+timevar+'_'+'12'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>13. Islands: "+ props[modevar+'_'+timevar+'_'+'13'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>14. South Bay: "+ props[modevar+'_'+timevar+'_'+'14'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>15. East Bay: "+ props[modevar+'_'+timevar+'_'+'15'+'_'+'pct'] + "%";;
+    this._div.childNodes[0].innerHTML +="<br>16. North Bay: "+ props[modevar+'_'+timevar+'_'+'16'+'_'+'pct'] + "%";;
+    
+};
+
 //add legend
 function keys(myObj) {//extract keys from obj
     var ks = [];
@@ -161,7 +224,7 @@ function keys(myObj) {//extract keys from obj
     return ks;
 }
 
-legend = L.control({position: 'bottomleft'});
+legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
     var title = 'Percentage of Person Trips';
     var div = L.DomUtil.create('div', 'info legend');
