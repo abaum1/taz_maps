@@ -2,7 +2,7 @@
 var tazs;
 var layerOptions = null;
 var timevar = 'am'; //start map with am
-var modevar = 'bike'; //start map bike
+var modevar = 'all'; //start map bike
 var legend;
 
 // Create variable to hold map element, give initial settings to map
@@ -23,7 +23,7 @@ var colorramp = {0: {'label': '0%&ndash;15%', 'color': '#fee5d9'}, 1: {'label': 
 
 function style(feature) {
     
-    var pct = feature.properties[modevar+'_'+timevar];
+    var pct = feature.properties[modevar+'_'+timevar+'_perc'];
     var color;
     if (pct >=0 && pct <= 15) {
         color = colorramp[0].color;
@@ -105,14 +105,16 @@ var menu1 = '<select id="timeSelect">' +
 '</select>';
 
 var menu2 = '<select id="modeSelect">' +
+'<option value="all">All</option>' + 
+'<option value="transit">Transit</option>' +
+'<option value="walk">Walk</option>' +
 '<option value="bike">Bike</option>' + 
+'<option value="drive">All Auto</option>' +
 '<option value="drive_alone">Drive Alone</option>' +
 '<option value="shared_ride_2">Shared Ride 2</option>' +
 '<option value="shared_ride_3">Shared Ride 3</option>' +
 '<option value="taxi">Taxi</option>' +
-'<option value="transit">Transit</option>' +
 '<option value="truck">Truck</option>' +
-'<option value="walk">Walk</option>' +
 '</select>';
 
 var button = '<button onclick="updateMap();">Update Map</button>';
@@ -140,11 +142,47 @@ info.onAdd = function (map) {
 
 // method that we will use to update the control based on feature properties passed
 info.update = function (props) {
+    var mode;
+    var time;
+    if (modevar== 'walk') {
+        mode = 'Walking'
+    } else if (modevar == 'all') {
+        mode = 'All Modes'
+    } else if (modevar == 'drive') {
+        mode = 'All Auto'
+    } else if (modevar == 'bike') {
+        mode = 'Biking'
+    } else if (modevar == 'drive_alone') {
+        mode = 'Drive Alone'
+    } else if (modevar == 'shared_ride_2') {
+        mode = 'Drive 2 People'
+    } else if (modevar == 'shared_ride_3') {
+        mode = 'Drive 3 People' 
+    } else if (modevar == 'taxi') {
+        mode = 'Taxi'
+    } else if (modevar == 'transit') {
+        mode = 'Transit'
+    } else if (modevar == 'truck') {
+        mode = 'Truck'
+    }
+    
+    if (timevar == 'am') {
+        time = 'AM'
+    } else if (timevar == 'ea') {
+        time = 'EA'
+    } else if (timevar == 'md') {
+        time = 'MD'
+    } else if (timevar == 'ev') {
+        time = 'EV'
+    } else if (timevar == 'pm') {
+        time = 'PM'
+    }
+    
     if ($.isEmptyObject(props)) {
-        this._div.childNodes[0].innerHTML = "<div id = 'updates'>Hover over a region to see trip origins</div>";
+        this._div.childNodes[0].innerHTML = "<div id = 'updates'>Hover over a region to see percentage of person trips</div>";
     } else {
-        var variable = modevar+'_'+timevar;
-    	this._div.childNodes[0].innerHTML = "Percentage of Person Trips: " + props[variable] + "%";
+        var variable = modevar+'_'+timevar+'_perc';
+    	this._div.childNodes[0].innerHTML = "Percentage of Person Trips During the " + time + " by " + mode + ": " + props[variable] + "%";
     }
 };
 
@@ -154,7 +192,7 @@ var moreinfo = L.control({position: 'topleft'});
 
 moreinfo.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-	this._div.innerHTML =  "<div id = 'updates'>Click to a region see trip destinations</div>";
+	this._div.innerHTML =  "<div id = 'updates'>Click on a region see more detailed information</div>";
     return this._div;
 };
 
@@ -166,6 +204,10 @@ moreinfo.update = function (props) {
     var time;
     if (modevar== 'walk') {
         mode = 'Walking'
+    } else if (modevar == 'all') {
+        mode = 'All Modes'
+    } else if (modevar == 'drive') {
+        mode = 'All Auto'
     } else if (modevar == 'bike') {
         mode = 'Biking'
     } else if (modevar == 'drive_alone') {
@@ -197,25 +239,31 @@ moreinfo.update = function (props) {
     if ($.isEmptyObject(props)) {
         this._div.childNodes[0].innerHTML = 'Click on a region to see trip destinations';
     } else {
-        this._div.childNodes[0].innerHTML = "<div id = 'updates'><b>In depth info about "+ mode + " " + time + " trips in " + props['FULLNAME']+":</b></div>";
-        this._div.childNodes[0].innerHTML +="Percentage of Regionwide " + mode + " " + time + " Trips: " + props[modevar+'_'+timevar+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br><br><b>Percentage of these trips going to:</b>";
-        this._div.childNodes[0].innerHTML +="<br>1. Downtown: "+ props[modevar+'_'+timevar+'_'+'1'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>2. SoMa: "+ props[modevar+'_'+timevar+'_'+'2'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>3. N. Beach/Chinatown: "+ props[modevar+'_'+timevar+'_'+'3'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>4. Western Market: "+ props[modevar+'_'+timevar+'_'+'4'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>5. Mission/Potrero: "+ props[modevar+'_'+timevar+'_'+'5'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>6. Noe/Glen/Bernal: "+ props[modevar+'_'+timevar+'_'+'6'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>7. Marina/N. Heights: "+ props[modevar+'_'+timevar+'_'+'7'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>8. Richmond: "+ props[modevar+'_'+timevar+'_'+'8'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>9. Bayshore: "+ props[modevar+'_'+timevar+'_'+'9'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>10. Outer Mission: "+ props[modevar+'_'+timevar+'_'+'10'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>11. Hill Districts: "+ props[modevar+'_'+timevar+'_'+'11'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>12. Sunset: "+ props[modevar+'_'+timevar+'_'+'12'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>13. Islands: "+ props[modevar+'_'+timevar+'_'+'13'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>14. South Bay: "+ props[modevar+'_'+timevar+'_'+'14'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>15. East Bay: "+ props[modevar+'_'+timevar+'_'+'15'+'_'+'pct'] + "%";
-        this._div.childNodes[0].innerHTML +="<br>16. North Bay: "+ props[modevar+'_'+timevar+'_'+'16'+'_'+'pct'] + "%";
+        //this._div.childNodes[0].innerHTML = "<b>Trips Profile: Person Trip Origins by " + mode +" during the " + time + " in " + props['FULLNAME'] + "</b>";
+        this._div.childNodes[0].innerHTML = "<b>Person Trip Origins Profile</b>";
+        this._div.childNodes[0].innerHTML += "<br>Mode: " + mode;
+        this._div.childNodes[0].innerHTML += "<br>Time: " + time;
+        this._div.childNodes[0].innerHTML += "<br>Place: " + props['FULLNAME'];
+        this._div.childNodes[0].innerHTML += "<br><br><div id = 'updates'><b>Proportion of Total Person Trips Within " + props['FULLNAME'] + ":</b></div>";
+        this._div.childNodes[0].innerHTML +="Number of Person Trips by " + mode + ": " + props[modevar+'_'+timevar+'_'+'ptm'].toLocaleString();
+        this._div.childNodes[0].innerHTML +="<br>Number of Total Person Trips: " + props[modevar+'_'+timevar+'_'+'ptt'].toLocaleString();
+        this._div.childNodes[0].innerHTML +="<br>Percentage of Person Trips by " + mode + ": " + props[modevar+'_'+timevar+'_perc'] + "%";
+        
+        this._div.childNodes[0].innerHTML += "<br><br><b>Proportion of Regional Trips by "+ mode + ":</b>";
+        this._div.childNodes[0].innerHTML +="<br>Number of " + props['FULLNAME'] + " Person Trips by " + mode + ": " + props[modevar+'_'+timevar].toLocaleString();
+        this._div.childNodes[0].innerHTML +="<br>Number of Regionwide Person Trips by " + mode + ": " + props[modevar+'_'+timevar+'_sum'].toLocaleString();
+        this._div.childNodes[0].innerHTML +="<br>Percentage of Regionwide Person Trips by " + mode + ": " + props[modevar+'_'+timevar+'_'+'pct'] + "%";
+        
+        this._div.childNodes[0].innerHTML +="<br><br><b>Percentage of Person Trips going to:</b>";
+        var table = "<table><tr><td>1. Downtown: "+ props[modevar+'_'+timevar+'_'+'1'+'_'+'pct'] + "%</td><td>9. Bayshore: "+ props[modevar+'_'+timevar+'_'+'9'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>2. SoMa: "+ props[modevar+'_'+timevar+'_'+'2'+'_'+'pct'] + "%</td><td>10. Outer Mission: "+ props[modevar+'_'+timevar+'_'+'10'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>3. N. Beach/Chinatown: "+ props[modevar+'_'+timevar+'_'+'3'+'_'+'pct'] + "%</td><td>11. Hill Districts: "+ props[modevar+'_'+timevar+'_'+'11'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>4. Western Market: "+ props[modevar+'_'+timevar+'_'+'4'+'_'+'pct'] + "%</td><td>12. Sunset: "+ props[modevar+'_'+timevar+'_'+'12'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>5. Mission/Potrero: "+ props[modevar+'_'+timevar+'_'+'5'+'_'+'pct'] + "%</td><td>13. Islands: "+ props[modevar+'_'+timevar+'_'+'13'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>6. Noe/Glen/Bernal: "+ props[modevar+'_'+timevar+'_'+'6'+'_'+'pct'] + "%</td><td>14. South Bay: "+ props[modevar+'_'+timevar+'_'+'14'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>7. Marina/N. Heights: "+ props[modevar+'_'+timevar+'_'+'7'+'_'+'pct'] + "%</td><td>15. East Bay: "+ props[modevar+'_'+timevar+'_'+'15'+'_'+'pct'] + "%</td></tr>";
+        table += "<tr><td>8. Richmond: "+ props[modevar+'_'+timevar+'_'+'8'+'_'+'pct'] + "%</td><td>16. North Bay: "+ props[modevar+'_'+timevar+'_'+'16'+'_'+'pct'] + "%</td></tr>";
+        this._div.childNodes[0].innerHTML += table;
     }
 };
 
